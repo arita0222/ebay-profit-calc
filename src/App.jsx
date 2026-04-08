@@ -39,8 +39,10 @@ export default function App() {
   const ebayFee = Math.round(sale * 0.2);
   const refund = Math.round(c * 10 / 110);
   const totalCost = c + s + duty + ebayFee;
-  const profit = sale - totalCost + refund;
-  const margin = sale > 0 ? ((profit / sale) * 100).toFixed(1) : "—";
+  const profitNoRefund = sale - totalCost;
+  const profitWithRefund = profitNoRefund + refund;
+  const marginNo = sale > 0 ? ((profitNoRefund / sale) * 100).toFixed(1) : "—";
+  const marginWith = sale > 0 ? ((profitWithRefund / sale) * 100).toFixed(1) : "—";
   const breakEvenJpy = Math.round((c - refund + s) / 0.7);
   const breakEvenUsd = (breakEvenJpy / r).toFixed(2);
 
@@ -62,15 +64,22 @@ export default function App() {
         <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
           {row("eBay手数料 (20%)", "¥" + ebayFee.toLocaleString(), true)}
           {row("関税 (10%)", "¥" + duty.toLocaleString(), true)}
+          {row("還付金（消費税）", "¥" + refund.toLocaleString(), true)}
           {row("総コスト", "¥" + totalCost.toLocaleString(), false)}
         </div>
-        <div style={{borderRadius:"12px",padding:"16px",marginTop:"12px",textAlign:"center",background:profit>=0?"#ecfdf5":"#fef2f2",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
-          <p style={{fontSize:"12px",color:"#888",margin:"0 0 4px"}}>粗利</p>
-          <p style={{fontSize:"32px",fontWeight:"bold",margin:0,color:profit>=0?"#059669":"#ef4444"}}>¥{profit.toLocaleString()}</p>
-          <p style={{fontSize:"14px",color:"#aaa",margin:"4px 0 0"}}>利益率 {margin}%</p>
+        <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
+          <div style={{flex:1,borderRadius:"12px",padding:"14px 8px",textAlign:"center",background:profitNoRefund>=0?"#ecfdf5":"#fef2f2",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
+            <p style={{fontSize:"11px",color:"#888",margin:"0 0 4px"}}>粗利（還付なし）</p>
+            <p style={{fontSize:"24px",fontWeight:"bold",margin:0,color:profitNoRefund>=0?"#059669":"#ef4444"}}>¥{profitNoRefund.toLocaleString()}</p>
+            <p style={{fontSize:"12px",color:"#aaa",margin:"4px 0 0"}}>{marginNo}%</p>
+          </div>
+          <div style={{flex:1,borderRadius:"12px",padding:"14px 8px",textAlign:"center",background:profitWithRefund>=0?"#ecfdf5":"#fef2f2",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
+            <p style={{fontSize:"11px",color:"#888",margin:"0 0 4px"}}>粗利（還付込み）</p>
+            <p style={{fontSize:"24px",fontWeight:"bold",margin:0,color:profitWithRefund>=0?"#059669":"#ef4444"}}>¥{profitWithRefund.toLocaleString()}</p>
+            <p style={{fontSize:"12px",color:"#aaa",margin:"4px 0 0"}}>{marginWith}%</p>
+          </div>
         </div>
         <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
-          {row("還付金（消費税）", "¥" + refund.toLocaleString(), true)}
           {row("損益分岐点", "$" + breakEvenUsd + "（¥" + breakEvenJpy.toLocaleString() + "）", false)}
         </div>
         <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); setRate("150"); }} style={{width:"100%",marginTop:"16px",padding:"8px",fontSize:"14px",color:"#aaa",background:"none",border:"none",cursor:"pointer"}}>リセット</button>
