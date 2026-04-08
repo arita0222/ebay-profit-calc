@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-const field = (label, value, onChange, placeholder) => (
+const field = (label, value, onChange, placeholder, unit) => (
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:"1px solid #f0f0f0"}}>
     <label style={{fontSize:"14px",color:"#666"}}>{label}</label>
     <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
-      <span style={{fontSize:"14px",color:"#aaa"}}>¥</span>
+      <span style={{fontSize:"14px",color:"#aaa"}}>{unit || "¥"}</span>
       <input
         type="number"
         inputMode="numeric"
@@ -21,10 +21,13 @@ export default function App() {
   const [cost, setCost] = useState("");
   const [shipping, setShipping] = useState("2500");
   const [salePrice, setSalePrice] = useState("");
+  const [rate, setRate] = useState("150");
 
   const c = Number(cost) || 0;
   const s = Number(shipping) || 0;
   const sale = Number(salePrice) || 0;
+  const r = Number(rate) || 150;
+  const saleUsd = (sale / r).toFixed(2);
   const duty = Math.round(sale * 0.1);
   const ebayFee = Math.round(sale * 0.2);
   const totalCost = c + s + duty + ebayFee;
@@ -40,6 +43,11 @@ export default function App() {
           {field("仕入れ金額", cost, setCost, "0")}
           {field("送料", shipping, setShipping, "2500")}
           {field("販売金額（JPY）", salePrice, setSalePrice, "0")}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:"1px solid #f0f0f0"}}>
+            <span style={{fontSize:"14px",color:"#666"}}>販売金額（USD）</span>
+            <span style={{fontSize:"18px",fontWeight:500}}>${saleUsd}</span>
+          </div>
+          {field("為替レート", rate, setRate, "150", "¥/$")}
         </div>
         <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
           <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderBottom:"1px solid #f0f0f0"}}>
@@ -60,7 +68,7 @@ export default function App() {
           <p style={{fontSize:"32px",fontWeight:"bold",margin:0,color:profit>=0?"#059669":"#ef4444"}}>¥{profit.toLocaleString()}</p>
           <p style={{fontSize:"14px",color:"#aaa",margin:"4px 0 0"}}>利益率 {margin}%</p>
         </div>
-        <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); }} style={{width:"100%",marginTop:"16px",padding:"8px",fontSize:"14px",color:"#aaa",background:"none",border:"none",cursor:"pointer"}}>リセット</button>
+        <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); setRate("150"); }} style={{width:"100%",marginTop:"16px",padding:"8px",fontSize:"14px",color:"#aaa",background:"none",border:"none",cursor:"pointer"}}>リセット</button>
       </div>
     </div>
   );
