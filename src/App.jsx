@@ -17,6 +17,13 @@ const field = (label, value, onChange, placeholder, unit) => (
   </div>
 );
 
+const row = (label, value, border) => (
+  <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderBottom:border?"1px solid #f0f0f0":"none"}}>
+    <span style={{fontSize:"14px",color:"#888"}}>{label}</span>
+    <span style={{fontSize:"14px"}}>{value}</span>
+  </div>
+);
+
 export default function App() {
   const [cost, setCost] = useState("");
   const [shipping, setShipping] = useState("2500");
@@ -30,9 +37,12 @@ export default function App() {
   const saleUsd = (sale / r).toFixed(2);
   const duty = Math.round(sale * 0.1);
   const ebayFee = Math.round(sale * 0.2);
+  const refund = Math.round(c * 10 / 110);
   const totalCost = c + s + duty + ebayFee;
-  const profit = sale - totalCost;
+  const profit = sale - totalCost + refund;
   const margin = sale > 0 ? ((profit / sale) * 100).toFixed(1) : "—";
+  const breakEvenJpy = Math.round((c - refund + s) / 0.7);
+  const breakEvenUsd = (breakEvenJpy / r).toFixed(2);
 
   return (
     <div style={{minHeight:"100vh",background:"#f5f5f5",display:"flex",justifyContent:"center",padding:"32px 16px"}}>
@@ -50,23 +60,18 @@ export default function App() {
           {field("為替レート", rate, setRate, "150", "¥/$")}
         </div>
         <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderBottom:"1px solid #f0f0f0"}}>
-            <span style={{fontSize:"14px",color:"#888"}}>eBay手数料 (20%)</span>
-            <span style={{fontSize:"14px"}}>¥{ebayFee.toLocaleString()}</span>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderBottom:"1px solid #f0f0f0"}}>
-            <span style={{fontSize:"14px",color:"#888"}}>関税 (10%)</span>
-            <span style={{fontSize:"14px"}}>¥{duty.toLocaleString()}</span>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0"}}>
-            <span style={{fontSize:"14px",color:"#888"}}>総コスト</span>
-            <span style={{fontSize:"14px"}}>¥{totalCost.toLocaleString()}</span>
-          </div>
+          {row("eBay手数料 (20%)", "¥" + ebayFee.toLocaleString(), true)}
+          {row("関税 (10%)", "¥" + duty.toLocaleString(), true)}
+          {row("総コスト", "¥" + totalCost.toLocaleString(), false)}
         </div>
         <div style={{borderRadius:"12px",padding:"16px",marginTop:"12px",textAlign:"center",background:profit>=0?"#ecfdf5":"#fef2f2",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
           <p style={{fontSize:"12px",color:"#888",margin:"0 0 4px"}}>粗利</p>
           <p style={{fontSize:"32px",fontWeight:"bold",margin:0,color:profit>=0?"#059669":"#ef4444"}}>¥{profit.toLocaleString()}</p>
           <p style={{fontSize:"14px",color:"#aaa",margin:"4px 0 0"}}>利益率 {margin}%</p>
+        </div>
+        <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
+          {row("還付金（消費税）", "¥" + refund.toLocaleString(), true)}
+          {row("損益分岐点", "$" + breakEvenUsd + "（¥" + breakEvenJpy.toLocaleString() + "）", false)}
         </div>
         <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); setRate("150"); }} style={{width:"100%",marginTop:"16px",padding:"8px",fontSize:"14px",color:"#aaa",background:"none",border:"none",cursor:"pointer"}}>リセット</button>
       </div>
