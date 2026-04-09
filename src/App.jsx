@@ -43,8 +43,10 @@ export default function App() {
   const profitWithRefund = profitNoRefund + refund;
   const marginNo = sale > 0 ? ((profitNoRefund / sale) * 100).toFixed(1) : "—";
   const marginWith = sale > 0 ? ((profitWithRefund / sale) * 100).toFixed(1) : "—";
-  const breakEvenJpy = Math.round((c - refund + s) / 0.7);
-  const breakEvenUsd = (breakEvenJpy / r).toFixed(2);
+  const breakEvenSaleJpy = Math.round((c - refund + s) / 0.7);
+  const breakEvenSaleUsd = (breakEvenSaleJpy / r).toFixed(2);
+  const maxCostNoRefund = sale - s - duty - ebayFee;
+  const maxCostWithRefund = Math.round((sale - s - duty - ebayFee) * 110 / 100);
 
   return (
     <div style={{minHeight:"100vh",background:"#f5f5f5",display:"flex",justifyContent:"center",padding:"32px 16px"}}>
@@ -80,7 +82,10 @@ export default function App() {
           </div>
         </div>
         <div style={{background:"#fff",borderRadius:"12px",padding:"0 16px",marginTop:"12px",boxShadow:"0 1px 3px rgba(0,0,0,0.08)"}}>
-          {row("損益分岐点", "$" + breakEvenUsd + "（¥" + breakEvenJpy.toLocaleString() + "）", false)}
+          <p style={{fontSize:"13px",color:"#666",padding:"12px 0 0",margin:0}}>損益分岐点</p>
+          {row("販売（これ以上で売る）", "$" + breakEvenSaleUsd + "（¥" + breakEvenSaleJpy.toLocaleString() + "）", true)}
+          {row("仕入れ上限（還付なし）", "¥" + maxCostNoRefund.toLocaleString(), true)}
+          {row("仕入れ上限（還付込み）", "¥" + maxCostWithRefund.toLocaleString(), false)}
         </div>
         <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); setRate("150"); }} style={{width:"100%",marginTop:"16px",padding:"8px",fontSize:"14px",color:"#aaa",background:"none",border:"none",cursor:"pointer"}}>リセット</button>
       </div>
