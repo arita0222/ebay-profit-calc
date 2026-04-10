@@ -4,14 +4,18 @@ import { useState } from "react"
 export default function ProfitCalc() {
   const [cost, setCost] = useState("")
   const [shipping, setShipping] = useState("2500")
-  const [salePriceUsd, setSalePriceUsd] = useState("")
+  const [salePrice, setSalePrice] = useState("")
   const [rate, setRate] = useState("150")
+  const [isUsd, setIsUsd] = useState(true)
 
   const c = Number(cost) || 0
   const s = Number(shipping) || 0
   const r = Number(rate) || 150
-  const saleUsd = Number(salePriceUsd) || 0
-  const saleJpy = Math.round(saleUsd * r)
+  const sp = Number(salePrice) || 0
+
+  const saleJpy = isUsd ? Math.round(sp * r) : sp
+  const saleUsd = isUsd ? sp : (r > 0 ? Math.round(sp / r * 100) / 100 : 0)
+
   const ebayFee = Math.round(saleJpy * 0.2)
   const duty = Math.round(saleJpy * 0.1)
   const refund = Math.round(c * 0.1)
@@ -43,10 +47,8 @@ export default function ProfitCalc() {
           {[
             { label: "仕入れ金額", value: cost, set: setCost, ph: "0", prefix: "¥" },
             { label: "送料", value: shipping, set: setShipping, ph: "2500", prefix: "¥" },
-            { label: "販売金額", value: salePriceUsd, set: setSalePriceUsd, ph: "0", prefix: "$" },
-            { label: "為替レート", value: rate, set: setRate, ph: "150", prefix: "¥/$" },
           ].map((f, i) => (
-            <div key={i} className={`flex items-center justify-between py-3 ${i < 3 ? "border-b border-gray-100" : ""}`}>
+            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100">
               <span className="text-sm text-gray-600">{f.label}</span>
               <div className="flex items-center gap-1">
                 <span className="text-sm text-gray-400">{f.prefix}</span>
@@ -54,12 +56,41 @@ export default function ProfitCalc() {
               </div>
             </div>
           ))}
+
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">販売金額</span>
+              <button
+                onClick={() => { setSalePrice(""); setIsUsd(!isUsd) }}
+                className="flex items-center rounded-full overflow-hidden border border-gray-200 text-xs"
+                style={{ padding: 0, cursor: "pointer", background: "none" }}
+              >
+                <span className={`px-2 py-0.5 ${isUsd ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-500"}`}>USD</span>
+                <span className={`px-2 py-0.5 ${!isUsd ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-500"}`}>JPY</span>
+              </button>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-400">{isUsd ? "$" : "¥"}</span>
+              <input type="number" inputMode="decimal" value={salePrice} onChange={e => setSalePrice(e.target.value)} placeholder="0" className="w-28 text-right text-lg font-semibold bg-transparent outline-none" />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-3">
+            <span className="text-sm text-gray-600">為替レート</span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-400">¥/$</span>
+              <input type="number" inputMode="decimal" value={rate} onChange={e => setRate(e.target.value)} placeholder="150" className="w-28 text-right text-lg font-semibold bg-transparent outline-none" />
+            </div>
+          </div>
         </div>
 
-        {saleUsd > 0 && (
+        {sp > 0 && (
           <>
             <div className="bg-white rounded-xl shadow-sm px-4 mt-3">
-              {row("売上（円換算）", "¥" + saleJpy.toLocaleString(), true)}
+              {isUsd
+                ? row("売上（円換算）", "¥" + saleJpy.toLocaleString(), true)
+                : row("売上（ドル換算）", "$" + saleUsd.toLocaleString(), true)
+              }
               {row("仕入れ", "-¥" + c.toLocaleString(), true)}
               {row("送料", "-¥" + s.toLocaleString(), true)}
               {row("eBay手数料 (20%)", "-¥" + ebayFee.toLocaleString(), true)}
@@ -90,7 +121,7 @@ export default function ProfitCalc() {
           </>
         )}
 
-        <button onClick={() => { setCost(""); setShipping("2500"); setSalePriceUsd(""); setRate("150") }} className="w-full mt-4 py-2 text-sm text-gray-400 bg-transparent border-none cursor-pointer">リセット</button>
+        <button onClick={() => { setCost(""); setShipping("2500"); setSalePrice(""); setRate("150"); setIsUsd(true) }} className="w-full mt-4 py-2 text-sm text-gray-400 bg-transparent border-none cursor-pointer">リセット</button>
       </div>
     </div>
   )
